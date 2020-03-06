@@ -9,7 +9,6 @@
     - vim
     - nano
     - epel-release
-    - openvpn
     - openssl
     - redhat-rpm-config 
     - gcc 
@@ -17,6 +16,18 @@
     - python-devel
     - python3
     - openssl-devel
+
+- name: install updates using yum
+  yum:
+    name: "*"
+    state: latest
+
+- name: install openvpn and python-pip package
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - openvpn
     - python-pip
 
 - name: upgrade pip
@@ -29,12 +40,5 @@
     - cryptography
     - pyopenssl 
 
-- name: install updates using yum
-  yum:
-    name: "*"
-    state: latest
 
-- name: install openvpn package
-  yum:
-    name: openvpn
 

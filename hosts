@@ -1,5 +1,5 @@
 [hosts]
-192.168.37.128
+192.168.36.115
 
 [hosts:vars]
 ansible_user=root

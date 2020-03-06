@@ -12,8 +12,7 @@ and after just restart interface with
 
 if the name of your interface is already enp0s3 
 
-After you have to run ansible receipt :
-in a first time change in hosts file 
+After, create hosts file : 
 >[hosts]\
 >IP OF HOST (192.168.X.X)\
 >[hosts:vars]\
@@ -24,5 +23,8 @@ in a first time change in hosts file
 >ansible_ssh_common_args='-o StrictHostKeyChecking=no'\
 
 just change "password", "IP OF HOST" and "root" if your user is not root.
+
+the last file to fill out is in roles/openvpn/defaults/main.yml, and configure your variables
+
 Now you can run the receipt 
 > ansible-playbook -i hosts main.yml

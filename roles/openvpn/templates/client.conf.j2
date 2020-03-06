@@ -86,8 +86,8 @@ persist-tun
 # for each client.  A single ca
 # file can be used for all clients.
 ca minica.pem
-cert client/windows.crt 
-key client/windows.key
+cert client/{{ client_name }}.crt 
+key client/{{ client_name }}.key
 
 # Verify server certificate by checking that the
 # certicate has the correct key usage set.
