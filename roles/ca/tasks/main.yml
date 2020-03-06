@@ -1,16 +1,5 @@
 ---
 
-- name: Ansible check minica exists.
-  stat:
-    path: /etc/openvpn/minica/main.go
-  register: minica_exists
-
-- name: clone the repository of minica
-  git:
-    repo: https://github.com/jsha/minica.git
-    dest: /etc/openvpn/minica
-  when: minica_exists.stat.exists == False
-
 - name: move keys and certificates to the good place for the CA
   copy:
     src: "{{ item }}"
