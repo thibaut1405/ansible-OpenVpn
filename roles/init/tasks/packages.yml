@@ -1,0 +1,40 @@
+---
+- name: install necessary packages
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - git
+    - wget
+    - vim
+    - nano
+    - epel-release
+    - openvpn
+    - openssl
+    - redhat-rpm-config 
+    - gcc 
+    - libffi-devel 
+    - python-devel
+    - python3
+    - openssl-devel
+    - python-pip
+
+- name: upgrade pip
+  shell: pip install --upgrade pip
+
+- name:
+  pip:
+    name: "{{ item }}" 
+  with_items:
+    - cryptography
+    - pyopenssl 
+
+- name: install updates using yum
+  yum:
+    name: "*"
+    state: latest
+
+- name: install openvpn package
+  yum:
+    name: openvpn
+

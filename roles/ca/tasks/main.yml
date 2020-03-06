@@ -1,0 +1,35 @@
+---
+
+- name: Ansible check minica exists.
+  stat:
+    path: /etc/openvpn/minica/main.go
+  register: minica_exists
+
+- name: clone the repository of minica
+  git:
+    repo: https://github.com/jsha/minica.git
+    dest: /etc/openvpn/minica
+  when: minica_exists.stat.exists == False
+
+- name: move keys and certificates to the good place for the CA
+  copy:
+    src: "{{ item }}"
+    dest: /etc/openvpn
+    owner: root
+    group: root
+    mode: u+rw
+  with_items:
+    - minica.pem
+    - minica-key.pem
+
+- name: move keys and certificates to the good place for the server
+  copy:
+    src: "{{ item }}"
+    dest: /etc/openvpn/server
+    owner: root
+    group: root
+    mode: u+rw
+  with_items:
+    - cert.pem
+    - key.pem
+

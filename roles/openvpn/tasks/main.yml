@@ -1,0 +1,89 @@
+---
+
+- name: copy server and client conf file in openvpn directory
+  copy:
+    src: "{{ item }}"
+    dest: /etc/openvpn
+    owner: root
+    group: root
+    mode: u+rw,g-r,o-r
+  with_items:
+    - client.conf
+    - server.conf
+  notify:
+    - restart openvpn
+
+- name: generate ta.key
+  shell: cd /etc/openvpn && openvpn --genkey --secret ta.key
+
+- name: Ansible check dhkey exists
+  stat:
+    path: /etc/openvpn/dh2048.pem
+  register: dh_exists
+
+- name: generate dh key
+  shell: cd /etc/openvpn && openssl dhparam -out dh2048.pem 2048
+  when: dh_exists.stat.exists == False
+
+- name: Generate an OpenSSL private key with the default values (2048 bits, RSA) and a passphrase
+  openssl_privatekey:
+    path: "/etc/openvpn/client/{{ client_name }}.key"
+    passphrase: "{{ password_private_key }}"
+    cipher: aes256
+    size: 2048
+
+- name: Generate an OpenSSL Certificate Signing Request
+  openssl_csr:
+    path:  /etc/openvpn/client/{{ client_name }}.csr
+    privatekey_path: /etc/openvpn/client/{{ client_name }}.key
+    privatekey_passphrase: Ppwinvpn2020
+    common_name: openvpn.org
+    extended_key_usage: clientAuth
+
+- name: Generate certificate signed with my own CA certificate
+  openssl_certificate:
+    path: /etc/openvpn/client/{{ client_name }}.crt
+    csr_path: /etc/openvpn/client/{{ client_name }}.csr
+    ownca_path: /etc/openvpn/minica.pem
+    ownca_privatekey_path: /etc/openvpn/minica-key.pem
+    provider: ownca
+
+- name: copy server and client conf file in openvpn directory
+  copy:
+    src: generate-ovpn.py
+    dest: /etc/openvpn
+    owner: root
+    group: root
+    mode: u+rw,g-r,o-r
+
+- name: generate ovpn file
+  shell: cd /etc/openvpn && python generate-ovpn.py client.conf
+
+- name: copy client.ovpn to client directory
+  copy:
+    src: /etc/openvpn/client.ovpn
+    dest: /etc/openvpn/client/{{ client_name }}.ovpn
+    owner: root
+    group: root
+    mode: u+rw,g-r,o-r
+    remote_src: yes
+
+- name: Remove file client.ovpn
+  file:
+    path: /etc/openvpn/client.ovpn
+    state: absent
+
+- name: define iptables for tunel
+  iptables:
+    chain: POSTROUTING
+    table: nat
+    src_range: 10.8.0.0-10.8.0.254
+    out_interface: enp0s3
+    jump: MASQUERADE
+
+- name: define iptables for tunel
+  iptables:
+    chain: FORWARD
+    src_range: 10.8.0.0-10.8.0.254
+    in_interface: tun0
+    jump: ACCEPT

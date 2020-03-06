@@ -1,0 +1,7 @@
+---
+
+- name: restart enp0s3
+  service:
+    name: network
+    state: restarted
+  listen: "restart enp0s3"

@@ -1,0 +1,27 @@
+---
+
+- name: Ensure ONBOOT is set to yes
+  lineinfile:
+    path: /etc/sysconfig/network-scripts/ifcfg-enp0s3
+    regexp: '^ONBOOT='
+    line: ONBOOT=yes
+  register: enp0s3_config_ok
+
+- name: enable network on centos
+  file:
+    path: /etc/sysconfig/network-scripts/ifcfg-enp0s3
+    state: absent
+  when: enp0s3_config_ok is failed
+
+- name: activate network on boot and restart network
+  copy:
+    src: ifcfg-enp0s3
+    dest: /etc/sysconfig/network-scripts/ifcfg-enp0s3
+    owner: root
+    group: root
+    mode: u+rw,g-r,o-r
+  notify:
+    - restart enp0s3
+  when: enp0s3_config_ok is failed
+
+- include_tasks: packages.yml
