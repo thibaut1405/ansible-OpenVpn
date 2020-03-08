@@ -29,6 +29,8 @@ the last file to fill out is in roles/openvpn/defaults/main.yml, and configure y
 Now you can run the receipt 
 > ansible-playbook -i hosts main.yml
 
+# Create USER
+if you just want create a user you can run : ansible-playbook -i hosts main.yml -t create_client
 
-# Réinstallation
-Attention si vous voulez regénerer les certicats d'un client il faudra supprimer les anciens.
+# Reinstallation
+Be carefull if you want re create user certificate, delete old certificate

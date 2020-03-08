@@ -1,0 +1,104 @@
+---
+
+- name: mask firewalld
+  systemd:
+    name: firewalld
+    masked: yes 
+
+- name: enable iptables
+  systemd:
+    name: iptables
+    state: started
+
+- name: stop firewalld
+  systemd: 
+    name: firewalld
+    state: stopped
+
+- name: start iptables
+  systemd: 
+    name: iptables
+    state: started
+
+- name: delete all iptables
+  shell: iptables --flush
+
+- name: define iptables for tunel
+  iptables:
+    chain: POSTROUTING
+    table: nat
+    source: 10.8.0.0/24
+    out_interface: enp0s3
+    jump: MASQUERADE
+
+- name: define iptables for tunel
+  iptables:
+    chain: FORWARD
+    source: 10.8.0.0/24
+    in_interface: tun0
+    jump: ACCEPT
+
+- name: Incomming OpenVPN traffic is allowed
+  become: true
+  iptables:
+    chain: INPUT
+    in_interface: enp0s3
+    ctstate: NEW
+    protocol: tcp
+    destination_port: "55345"
+    jump: ACCEPT
+
+- name: TUN interface connections to OpenVPN server is allowed
+  become: true
+  iptables:
+    chain: INPUT
+    in_interface: tun+
+    jump: ACCEPT
+
+- name: TUN interface connections can be forwarded through other interfaces
+  become: true
+  iptables:
+    chain: FORWARD
+    in_interface: tun+
+    jump: ACCEPT
+
+- name: traffic can be forwarded between tun and eth interfaces
+  become: true
+  iptables:
+    chain: FORWARD
+    in_interface: tun+
+    out_interface: enp0s3
+    ctstate:
+      - RELATED
+      - ESTABLISHED
+    jump: ACCEPT
+
+- name: traffic can be forwarded between tun and eth interfaces
+  become: true
+  iptables:
+    chain: FORWARD
+    in_interface: enp0s3
+    out_interface: tun+
+    ctstate:
+      - RELATED
+      - ESTABLISHED
+    jump: ACCEPT
+
+- name: VPN traffic is nated to internet.
+  become: true
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    source: 10.8.0.0/24
+    out_interface: enp0s3
+    jump: MASQUERADE
+
+- name: outgoing tun traffic is allowed
+  become: true
+  iptables:
+    chain: OUTPUT
+    out_interface: tun+
+    jump: ACCEPT
+
+- name: save iptables
+  shell: iptables-save > /etc/sysconfig/iptables
