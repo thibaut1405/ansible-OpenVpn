@@ -38,7 +38,7 @@
     in_interface: tun0
     jump: ACCEPT
 
-- name: Incomming OpenVPN traffic is allowed
+- name: allow incomming traffic
   become: true
   iptables:
     chain: INPUT
@@ -48,21 +48,21 @@
     destination_port: "55345"
     jump: ACCEPT
 
-- name: TUN interface connections to OpenVPN server is allowed
+- name: tunnel interface connections to openvpn allow
   become: true
   iptables:
     chain: INPUT
     in_interface: tun+
     jump: ACCEPT
 
-- name: TUN interface connections can be forwarded through other interfaces
+- name: tunnel interface connections can forward throught the other
   become: true
   iptables:
     chain: FORWARD
     in_interface: tun+
     jump: ACCEPT
 
-- name: traffic can be forwarded between tun and eth interfaces
+- name: traffic can be forwarded between tun and enp0s3 interfaces
   become: true
   iptables:
     chain: FORWARD
@@ -73,7 +73,7 @@
       - ESTABLISHED
     jump: ACCEPT
 
-- name: traffic can be forwarded between tun and eth interfaces
+- name: traffic can be forwarded between tun and enp0s3 interfaces
   become: true
   iptables:
     chain: FORWARD
@@ -84,7 +84,7 @@
       - ESTABLISHED
     jump: ACCEPT
 
-- name: VPN traffic is nated to internet.
+- name: The VPN is nated to internet
   become: true
   iptables:
     table: nat
@@ -93,7 +93,7 @@
     out_interface: enp0s3
     jump: MASQUERADE
 
-- name: outgoing tun traffic is allowed
+- name: the outgoing VPN traffic is allowed
   become: true
   iptables:
     chain: OUTPUT

@@ -1,13 +1,13 @@
 ---
-- name: copy server conf file in server directory
-  copy:
-    src: server.conf
-    dest: /etc/openvpn/server
+- name: copy client conf file in client directory
+  template:
+    src: "server.conf.j2"
+    dest: "/etc/openvpn/server/server.conf"
+    mode: 0644
     owner: root
     group: root
-    mode: u+rw,g-r,o-r
   notify:
-    - restart openvpn
+    - restart_openvpn
 
 - name: Ansible check takey exists
   stat:
@@ -27,9 +27,22 @@
   shell: cd /etc/openvpn && openssl dhparam -out dh2048.pem 2048
   when: dh_exists.stat.exists == False
 
+- name: Enable ip forward
+  become: true
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+
 - name: Configure iptables
   import_tasks: iptables.yml
 
 - name: Configure client
   import_tasks: client.yml
   tags: create_client
+
+- name: OpenVPN is started and enabled
+  systemd:
+    name: openvpn-server@server
+    state: started
+    enabled: yes

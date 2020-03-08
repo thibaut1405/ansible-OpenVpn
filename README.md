@@ -26,6 +26,10 @@ just change "password", "IP OF HOST" and "root" if your user is not root.
 
 the last file to fill out is in roles/openvpn/defaults/main.yml, and configure your variables
 
+>client_name: client_name\
+>password_private_key : password_of_the_private_key
+
+
 Now you can run the receipt 
 > ansible-playbook -i hosts main.yml
 

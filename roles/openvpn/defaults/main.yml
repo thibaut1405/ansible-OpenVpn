@@ -1,2 +1,3 @@
-client_name: client3
-password_private_key : Ppwinvpn2020
+client_name: client4
+password_private_key: Ppwinvpn2020
+server_port: 55345
