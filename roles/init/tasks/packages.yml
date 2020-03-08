@@ -29,6 +29,7 @@
     packages:
     - openvpn
     - python-pip
+    - iptables-services
 
 - name: upgrade pip
   shell: pip install --upgrade pip

@@ -28,3 +28,7 @@ the last file to fill out is in roles/openvpn/defaults/main.yml, and configure y
 
 Now you can run the receipt 
 > ansible-playbook -i hosts main.yml
+
+
+# Réinstallation
+Attention si vous voulez regénerer les certicats d'un client il faudra supprimer les anciens.

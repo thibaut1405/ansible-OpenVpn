@@ -6,7 +6,7 @@
     dest: /etc/openvpn
     owner: root
     group: root
-    mode: '0500'
+    mode: '0600'
   with_items:
     - minica.pem
     - minica-key.pem
@@ -17,7 +17,7 @@
     dest: /etc/openvpn/server
     owner: root
     group: root
-    mode: '0500'
+    mode: '0600'
   with_items:
     - cert.pem
     - key.pem

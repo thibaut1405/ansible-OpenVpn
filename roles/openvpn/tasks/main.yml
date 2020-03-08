@@ -18,8 +18,14 @@
   notify:
     - restart openvpn
 
+- name: Ansible check takey exists
+  stat:
+    path: /etc/openvpn/ta.key
+  register: ta_exists
+
 - name: generate ta.key
   shell: cd /etc/openvpn && openvpn --genkey --secret ta.key
+  when: ta_exists.stat.exists == False
 
 - name: Ansible check dhkey exists
   stat:
@@ -59,7 +65,7 @@
     dest: /etc/openvpn
     owner: root
     group: root
-    mode: u+rw,g-r,o-r
+    mode: u+rwx,g-r,o-r
 
 - name: generate ovpn file
   shell: cd /etc/openvpn && python generate-ovpn.py client.conf
@@ -78,17 +84,43 @@
     path: /etc/openvpn/client.ovpn
     state: absent
 
+- name: mask firewalld
+  systemd:
+    name: firewalld
+    masked: yes 
+
+- name: enable iptables
+  systemd:
+    name: iptables
+    state: started
+
+- name: stop firewalld
+  systemd: 
+    name: firewalld
+    state: stopped
+
+- name: start iptables
+  systemd: 
+    name: iptables
+    state: started
+
+- name: delete all iptables
+  shell: iptables --flush
+
 - name: define iptables for tunel
   iptables:
     chain: POSTROUTING
     table: nat
-    src_range: 10.8.0.0-10.8.0.254
+    source: 10.8.0.0/24
     out_interface: enp0s3
     jump: MASQUERADE
 
 - name: define iptables for tunel
   iptables:
     chain: FORWARD
-    src_range: 10.8.0.0-10.8.0.254
+    source: 10.8.0.0/24
     in_interface: tun0
     jump: ACCEPT
+
+- name: save iptables
+  shell: iptables-save > /etc/sysconfig/iptables
